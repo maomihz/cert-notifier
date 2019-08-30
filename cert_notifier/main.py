@@ -155,7 +155,7 @@ def run():
 
 
     # Obtain notifiers and send notifications
-    from notifier import get_notifiers
+    from .notifier import get_notifiers
     notifier = get_notifiers(parser)
 
     msg = '\n'.join(info)
@@ -166,25 +166,3 @@ def run():
         ))
 
     return msg
-
-if __name__ == '__main__':
-    result = run()
-    # try:
-    #     value = json.loads(result)
-    # except json.decoder.JSONDecodeError:
-    #     print(result)
-    #     exit(0)
-
-    # print(value)
-    # if value['ok']:
-    #     msgid = value['result']['message_id']
-    # try:
-    #     with open('last_id', 'r') as f:
-    #         last_id = int(f.read())
-    #         telegram_delete(last_id)
-    # except FileNotFoundError:
-    #     pass
-    # except ValueError:
-    #     pass
-    # with open('last_id', 'w') as f:
-    #     f.write(str(msgid))
