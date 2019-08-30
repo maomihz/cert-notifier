@@ -1,92 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import ssl
-import socket
-from ssl import cert_time_to_seconds
-from datetime import datetime, timezone, timedelta
 import configparser
-
-
-# Class for parsing certificate information
-class CertInfo:
-    # certinfo: SSLSocket.getpeercert()
-    # cert: SSLSocket.getpeercert(True)
-    def __init__(self, certinfo, cert=None):
-        self.cert = cert
-        self.certinfo = certinfo
-
-        # Certificate common name
-        self.subject = dict(x[0] for x in self.certinfo['subject'])
-
-        # Issuer common name
-        self.issuer = dict(x[0] for x in self.certinfo['issuer'])
-
-        # Expire time
-        self.notBefore = datetime.utcfromtimestamp(cert_time_to_seconds(self.certinfo['notBefore']))
-        self.notAfter = datetime.utcfromtimestamp(cert_time_to_seconds(self.certinfo['notAfter']))
-
-    # Certificate time calculations
-    @property
-    def duration(self):
-        return self.notAfter - self.notBefore
-
-    @property
-    def elapsed(self):
-        return datetime.utcnow() - self.notBefore
-
-    @property
-    def remain(self):
-        return self.notAfter - datetime.utcnow()
-
-    @property
-    def percent(self):
-        return self.elapsed / self.duration
-
-    @property
-    def key(self):
-        return self.subject['commonName'], self.notBefore.timestamp(), self.notAfter.timestamp()
-
-
-
-class SSLHost:
-    def __init__(self, hostname, refresh=False):
-        self.host = hostname
-        self.reason = None # Reason for error
-
-        if refresh:
-            self.refresh()
-
-    def error(self, reason=None):
-        if reason:
-            self.reason = reason
-        return self.reason
-
-    def refresh(self):
-        try:
-            # Create a socket and connect to it
-            ctx = ssl.create_default_context()
-            s = ctx.wrap_socket(socket.socket(), server_hostname=self.host)
-            s.connect((self.host, 443))
-        except ssl.SSLError as e:
-            self.error(e.reason)
-        except ConnectionRefusedError as e:
-            self.error("Connection Refused")
-        except socket.gaierror as e:
-            self.error("Name Not Resolved")
-        except Exception as e:
-            self.error(str(e))
-
-
-        if self.error():
-            return
-
-        try:
-            self.certinfo = CertInfo(s.getpeercert(), s.getpeercert(True))
-        except KeyError:
-            self.error('Missing subjects in certificate.')
-
-
+from datetime import datetime
+from . import SSLHost
 
 def run():
     parser = configparser.ConfigParser(allow_no_value=True)
