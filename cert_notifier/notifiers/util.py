@@ -10,8 +10,8 @@ notifier_map = dict(
 )
 
 def get_notifiers(config):
-    return ChainNotifier(
+    return ChainNotifier(*[
         v(**config[k])
         for k, v in notifier_map.items()
         if config.has_section(k) and config[k].getboolean('enable')
-    )
+    ])
