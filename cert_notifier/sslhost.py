@@ -22,13 +22,19 @@ class SSLHost:
             ctx = ssl.create_default_context()
             s = ctx.wrap_socket(socket.socket(), server_hostname=self.host)
             s.connect((self.host, 443))
+        except ssl.SSLCertVerificationError as e:
+            self.error("[%d] %s" % (e.verify_code, e.verify_message))
         except ssl.SSLError as e:
+            # Generic error related to SSL connection
             self.error(e.reason)
-        except ConnectionRefusedError as e:
-            self.error("Connection Refused")
+        except ConnectionError as e:
+            # Generic error related to TCP connection
+            self.error(str(e))
         except socket.gaierror as e:
-            self.error("Name Not Resolved")
+            # Host name resolution error
+            self.error(str(e))
         except Exception as e:
+            # Any other error
             self.error(str(e))
 
 
