@@ -3,7 +3,8 @@
 
 import configparser
 from datetime import datetime
-from . import SSLHost
+from .sslhost import SSLHost
+from .notifiers import get_notifiers
 
 def run():
     parser = configparser.ConfigParser(allow_no_value=True)
@@ -72,7 +73,6 @@ def run():
 
 
     # Obtain notifiers and send notifications
-    from .notifier import get_notifiers
     notifier = get_notifiers(parser)
 
     msg = '\n'.join(info)
